@@ -1,6 +1,13 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+public enum PetState
+{
+    Idle_random,
+    Idle_foucus,
+    Feeding
+}
+
 public class GeckoController_Full : MonoBehaviour
 {
     [SerializeField] Transform target;
@@ -13,8 +20,14 @@ public class GeckoController_Full : MonoBehaviour
     [SerializeField] bool legSteppingEnabled;
     bool legIKEnabled;
 
+    private PetState curState = PetState.Idle_random;
+    public Transform fly;
+    public Transform PlayerHand;
+
     void Awake()
     {
+        ChangeState(PetState.Idle_random);
+
         StartCoroutine(LegUpdateCoroutine());
         TailInitialize();
         RootMotionInitialize();
@@ -22,6 +35,13 @@ public class GeckoController_Full : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            if(curState == PetState.Idle_random) ChangeState(PetState.Idle_foucus);
+            else if (curState == PetState.Idle_foucus) ChangeState(PetState.Feeding);
+            else ChangeState(PetState.Idle_random);
+        }
+       
         RootMotionUpdate();
     }
 
@@ -403,6 +423,35 @@ public class GeckoController_Full : MonoBehaviour
         foreach (var ik in GetComponentsInChildren<InverseKinematics>())
         {
             ik.enabled = legIKEnabled;
+        }
+    }
+
+    void ChangeState(PetState state)
+    {
+        if(curState != state)
+        {
+            curState = state;
+        }
+        if (state == PetState.Idle_random)
+        {
+            //fly.gameObject.SetActive(true);
+            moveSpeed = 0.01f;
+            target = fly;
+            Debug.Log("Changed to idle_random state");
+        }else if(state == PetState.Idle_foucus)
+        {
+            //fly.gameObject.SetActive(false);
+            moveSpeed = 0.01f;
+            target = PlayerHand;
+            Debug.Log("Changed to idle_foucus state");
+        }
+        else
+        {
+            //fly.gameObject.SetActive(false);
+            minDistToTarget = 0.01f;
+            moveSpeed = 0.5f;
+            target = PlayerHand;
+            Debug.Log("Changed to feeding state");
         }
     }
 }
