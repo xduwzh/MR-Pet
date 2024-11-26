@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class DisableMetaPopup : MonoBehaviour
-{
-    private const string TelemetryEnabledKey = "OVRTelemetry.TelemetryEnabled";
+//public class DisableMetaPopup : MonoBehaviour
+//{
+//    private const string TelemetryEnabledKey = "OVRTelemetry.TelemetryEnabled";
 
-    [ContextMenu("DisablePopup")]
-    public void DisablePopup()
-    {
-        EditorPrefs.SetBool(TelemetryEnabledKey, false);
-    }
-}
+//    [ContextMenu("DisablePopup")]
+//    public void DisablePopup()
+//    {
+//        EditorPrefs.SetBool(TelemetryEnabledKey, false);
+//    }
+//}

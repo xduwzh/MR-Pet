@@ -10,6 +10,19 @@ public enum PetState
 
 public class GeckoController_Full : MonoBehaviour
 {
+
+    [SerializeField] Transform ball; // 抛出的球
+    [SerializeField] Transform playerHead; // 玩家头部位置 (Meta Quest 头盔位置)
+
+    [SerializeField] float grabRange = 0.01f; // 抓取范围
+    [SerializeField] float followSpeed = 0.8f; // 跟随球的速度
+    [SerializeField] float returnSpeed = 0.01f; // 返回玩家速度
+    private GrabbableStatusTracker grabbableStatusTracker; // 追踪球的抓取状态
+    private bool isReturning = false; // 是否正在返回玩家
+
+
+
+
     [SerializeField] Transform target;
 
     [SerializeField] bool rootMotionEnabled;
@@ -23,6 +36,15 @@ public class GeckoController_Full : MonoBehaviour
     private PetState curState = PetState.Idle_random;
     public Transform fly;
     public Transform PlayerHand;
+
+    private void Start()
+    {
+        // 获取球上的抓取状态脚本
+        if (ball != null)
+        {
+            grabbableStatusTracker = ball.GetComponent<GrabbableStatusTracker>();
+        }
+    }
 
     void Awake()
     {
@@ -43,6 +65,36 @@ public class GeckoController_Full : MonoBehaviour
         }
        
         RootMotionUpdate();
+
+
+        // 检查球是否被抓取
+        if (grabbableStatusTracker != null && !grabbableStatusTracker.IsGrabbed)
+        {
+            // 球未被抓取，追踪球
+            //if (!isReturning)
+            //{
+            //    MoveTowards(ball.position, followSpeed);
+
+            //    // 如果靠近球，抓取球
+            //    if (Vector3.Distance(transform.position, ball.position) <= grabRange)
+            //    {
+            //        PickupBall();
+            //    }
+            //}
+            //else
+            //{
+            //    // 正在返回玩家
+            //    MoveTowards(playerHead.position, returnSpeed);
+
+            //    // 靠近玩家后放下球
+            //    if (Vector3.Distance(transform.position, playerHead.position) <= grabRange)
+            //    {
+            //        DropBall();
+            //    }
+            //}
+            MoveTowards(ball.position, followSpeed);
+        }
+
     }
 
     void LateUpdate()
@@ -454,4 +506,38 @@ public class GeckoController_Full : MonoBehaviour
             Debug.Log("Changed to feeding state");
         }
     }
+
+
+
+    private void MoveTowards(Vector3 targetPosition, float speed)
+    {
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        transform.position += direction * speed * Time.deltaTime;
+    }
+
+    private void PickupBall()
+    {
+        // 抓取球，将球设置为宠物子对象
+        ball.SetParent(transform);
+        ball.localPosition = Vector3.zero; // 将球放在宠物嘴的位置
+        isReturning = true;
+        Debug.Log("Ball picked up!");
+    }
+
+    private void DropBall()
+    {
+        // 放下球，返回原始状态
+        ball.SetParent(null);
+        isReturning = false;
+        Debug.Log("Ball returned to player!");
+    }
+
+    private void MoveLizardTowardsCube()
+    {
+        // Implement your lizard movement logic here
+        transform.position += Vector3.right * Time.deltaTime;
+
+    }
+
+
 }
