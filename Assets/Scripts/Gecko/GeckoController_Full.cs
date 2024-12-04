@@ -20,7 +20,14 @@ public class GeckoController_Full : MonoBehaviour
     private GrabbableStatusTracker grabbableStatusTracker; // 追踪球的抓取状态
     private bool isReturning = false; // 是否正在返回玩家
 
+    [Header("Pet Attributes")]
+    [SerializeField, Range(0, 100)] private float hunger = 50; // 饥饿值
+    [SerializeField, Range(0, 100)] private float happiness = 80; // 幸福感
+    [SerializeField, Range(0, 100)] private float cleanliness = 90; // 清洁度
 
+    [SerializeField] private float hungerDecayRate = 0.5f; // 饥饿值减少速度
+    [SerializeField] private float cleanlinessDecayRate = 0.3f; // 清洁度减少速度
+    [SerializeField] private float lowThreshold = 20; // 低值警告阈值
 
 
     [SerializeField] Transform target;
@@ -539,5 +546,42 @@ public class GeckoController_Full : MonoBehaviour
 
     }
 
+
+    private void UpdateAttributes()
+    {
+        hunger = Mathf.Clamp(hunger - hungerDecayRate * Time.deltaTime, 0, 100);
+        cleanliness = Mathf.Clamp(cleanliness - cleanlinessDecayRate * Time.deltaTime, 0, 100);
+    }
+
+    private void CheckAttributes()
+    {
+        if (hunger <= lowThreshold)
+            Debug.LogWarning("Pet is very hungry! Feed it soon.");
+        if (cleanliness <= lowThreshold)
+            Debug.LogWarning("Pet is getting dirty! Clean it up.");
+        if (happiness <= lowThreshold)
+            Debug.LogWarning("Pet is unhappy! Spend some time with it.");
+    }
+
+
+    public void Feed(float foodAmount)
+    {
+        hunger = Mathf.Clamp(hunger + foodAmount, 0, 100);
+        happiness = Mathf.Clamp(happiness + foodAmount * 0.5f, 0, 100);
+        Debug.Log("Pet has been fed!");
+    }
+
+    public void Clean(float cleanlinessAmount)
+    {
+        cleanliness = Mathf.Clamp(cleanliness + cleanlinessAmount, 0, 100);
+        happiness = Mathf.Clamp(happiness + cleanlinessAmount * 0.3f, 0, 100);
+        Debug.Log("Pet has been cleaned!");
+    }
+
+    public void Play(float happinessAmount)
+    {
+        happiness = Mathf.Clamp(happiness + happinessAmount, 0, 100);
+        Debug.Log("Pet enjoyed playing!");
+    }
 
 }
