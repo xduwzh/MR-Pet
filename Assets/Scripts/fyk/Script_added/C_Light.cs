@@ -9,7 +9,7 @@ public class C_Light : MonoBehaviour
     private Transform target;
     public float moveSpeed;
     // Start is called before the first frame update
-    IEnumerator Start()
+    IEnumerator start()
     {
         while (true)
         {
