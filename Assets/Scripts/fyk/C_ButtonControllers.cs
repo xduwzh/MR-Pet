@@ -5,7 +5,6 @@ using UnityEngine;
 public class C_ButtonControllers : MonoBehaviour
 {
     // Start is called before the first frame update
-    public GameObject food;
     public GameObject Lizard;
     //cat things
     public GameObject CatPrefab;
@@ -17,6 +16,8 @@ public class C_ButtonControllers : MonoBehaviour
     private GameObject currentPet;
     private int usingPetIndex = -1;
     private int petCount = 3;
+
+    public Transform UIManager;
     void Start()
     {
         currentPet = Lizard;
@@ -29,33 +30,12 @@ public class C_ButtonControllers : MonoBehaviour
     }
     public void clicked()
     {
-        food.SetActive(true);
-        Lizard.GetComponent<GeckoController_Full>().target = food.transform;
+        //GeneralFood.SetActive(true);
+        //Lizard.GetComponent<GeckoController_Full>().target = GeneralFood.transform;
     }
 
     public void changePet()
     {
-        //if(cat.active == false)
-        //{
-        //    cat.SetActive(true);
-        //    light.SetActive(true);
-        //    Lizard.SetActive(false);
-        //}
-        //else
-        //{
-        //    cat.SetActive(false);
-        //    light.SetActive(false);
-        //    Lizard.SetActive(true);
-        //}
-
-        //if (currentPet == null)
-        //{
-        //    CreatePet();
-        //}
-        //else
-        //{
-        //    ReplacePet((usingPetIndex + 1) % petCount);
-        //}
         ReplacePet((usingPetIndex + 1) % petCount);
     }
 
@@ -71,12 +51,22 @@ public class C_ButtonControllers : MonoBehaviour
         switch (index)
         {
             case (0):
-                Lizard.SetActive(true);food.SetActive(true);DogPrefab.SetActive(false);dogBone.SetActive(false); usingPetIndex = 0; break;
+                Lizard.SetActive(true); DogPrefab.SetActive(false);dogBone.SetActive(false); usingPetIndex = 0;
+                UIManager.GetComponent<C_UIManager>().ChangePet(PetType.Lizard);
+                break;
             case (1):
-                CatPrefab.SetActive(true);light.SetActive(true);Lizard.SetActive(false); food.SetActive(false); usingPetIndex = 1; break;
+                CatPrefab.SetActive(true);light.SetActive(true);Lizard.SetActive(false); usingPetIndex = 1;
+                UIManager.GetComponent<C_UIManager>().ChangePet(PetType.Cat);
+                break;
             case (2):
-                DogPrefab.SetActive(true);dogBone.SetActive(true); CatPrefab.SetActive(false); light.SetActive(false); usingPetIndex = 2; break;
+                DogPrefab.SetActive(true);dogBone.SetActive(true); CatPrefab.SetActive(false); light.SetActive(false); usingPetIndex = 2;
+                UIManager.GetComponent<C_UIManager>().ChangePet(PetType.Dog);
+                break;
         }
+    }
+    private void GenerateFood()
+    {
+
     }
 
     private void DeletePet()
