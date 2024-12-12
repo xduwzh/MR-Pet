@@ -11,11 +11,7 @@ public class C_Seed : MonoBehaviour
     [HideInInspector]
     public Transform generateParent;
 
-    public GameObject Tree1;
-    public GameObject Tree2;
-    public GameObject Tree3;
-    public GameObject Tree4;
-    public GameObject Tree5;
+    public GameObject[] Trees;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,9 +29,12 @@ public class C_Seed : MonoBehaviour
         //debugPanel.GetComponent<TextMeshProUGUI>().text = other.gameObject.name;
         if (other.gameObject.name == "FLOOR_EffectMesh")
         {
-            GameObject tree = Instantiate(Tree1, this.transform.position, Quaternion.identity);
+            int index = Random.Range(0, Trees.Length);
+            GameObject tree = Instantiate(Trees[index], this.transform.position, Quaternion.identity);
             tree.transform.parent = generateParent;
             Destroy(this.transform.parent.gameObject);
         }
     }
+
+
 }

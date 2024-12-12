@@ -167,11 +167,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugPanel: {fileID: 0}
   generateParent: {fileID: 0}
-  Tree1: {fileID: 1369679905575684, guid: 8951f907d878f44288d2ea37b5a0f9e3, type: 3}
-  Tree2: {fileID: 1830115047457074, guid: 62fd7e46f2d0940749fb66c9443ff3c0, type: 3}
-  Tree3: {fileID: 1549180762829892, guid: 15b8649ecf421464586d535eba312f17, type: 3}
-  Tree4: {fileID: 1130959867764666, guid: 81bce50924cffc644ae62c5a3c5c4192, type: 3}
-  Tree5: {fileID: 1169344475116984, guid: 6d1248d6de7824b1892a9b1a1dd493f1, type: 3}
+  Trees:
+  - {fileID: 1830115047457074, guid: 62fd7e46f2d0940749fb66c9443ff3c0, type: 3}
+  - {fileID: 1369679905575684, guid: 8951f907d878f44288d2ea37b5a0f9e3, type: 3}
+  - {fileID: 1169344475116984, guid: 6d1248d6de7824b1892a9b1a1dd493f1, type: 3}
+  - {fileID: 1549180762829892, guid: 15b8649ecf421464586d535eba312f17, type: 3}
+  - {fileID: 1017128449598608, guid: 0adbe808ddb421445b8fc6fafbbad7b8, type: 3}
+  - {fileID: 1130959867764666, guid: 81bce50924cffc644ae62c5a3c5c4192, type: 3}
 --- !u!135 &460280055674682261
 SphereCollider:
   m_ObjectHideFlags: 0

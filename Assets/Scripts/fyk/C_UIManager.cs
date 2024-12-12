@@ -86,9 +86,14 @@ public class C_UIManager : MonoBehaviour
 
     public Transform SeedsParent;
     public Transform TreesParent;
+    public Transform FoodParent;
 
     public Transform SeedsBowl;
 
+    [Header("ParticleEffect")]
+    public GameObject HeartsEffect;
+
+    public Transform DebugPanel;
 
     void Start()
     {
@@ -106,18 +111,24 @@ public class C_UIManager : MonoBehaviour
 
     public void GenerateFood()
     {
+        if(FoodParent.gameObject.active == false)
+        {
+            FoodParent.gameObject.SetActive(true);
+        }
+        GameObject tmp = new GameObject();
         switch (usingPetIndex)
         {
             case (0):
-                Instantiate(LizardFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
+                tmp = Instantiate(LizardFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
                 break;
             case (1):
-                Instantiate(CatFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
+                tmp = Instantiate(CatFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
                 break;
             case (2):
-                Instantiate(DogFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
+                tmp = Instantiate(DogFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
                 break;
         }
+        tmp.transform.SetParent(FoodParent);
     }
     public void cleaning()
     {
@@ -166,12 +177,6 @@ public class C_UIManager : MonoBehaviour
 
     public void updateUI()
     {
-        //hungerBar.GetComponent<Scrollbar>().size = curPet.hunger / 100.0f;
-        //comfortBar.GetComponent<Scrollbar>().size =  curPet.comfort / 100.0f;
-        //moodBar.GetComponent<Scrollbar>().size =  curPet.mood / 100.0f;
-        //petImage.GetComponent<Image>().sprite = curPet.imageSource;
-        //petName.GetComponent<TextMeshProUGUI>().text = curPet.name;
-
         hungerBar.GetComponent<Scrollbar>().size = Pets[curPetType].hunger / 100.0f;
         comfortBar.GetComponent<Scrollbar>().size = Pets[curPetType].comfort / 100.0f;
         moodBar.GetComponent<Scrollbar>().size = Pets[curPetType].mood / 100.0f;
@@ -221,6 +226,7 @@ public class C_UIManager : MonoBehaviour
         {
             Pets[curPetType].mood += 5;
         }
+        StartCoroutine(playHeartEffect(2.0f));
         hungerBar.GetComponent<Scrollbar>().size = Pets[curPetType].hunger / 100.0f;
         moodBar.GetComponent<Scrollbar>().size = Pets[curPetType].mood / 100.0f;
     }
@@ -267,6 +273,7 @@ public class C_UIManager : MonoBehaviour
         {
             Pets[curPetType].mood += 10;
         }
+        StartCoroutine(playHeartEffect(2.0f));
         hungerBar.GetComponent<Scrollbar>().size = Pets[curPetType].comfort / 100.0f;
         moodBar.GetComponent<Scrollbar>().size = Pets[curPetType].mood / 100.0f;
     }
@@ -414,5 +421,39 @@ public class C_UIManager : MonoBehaviour
     {
         SeedsBowl.gameObject.SetActive(false);
         SeedsParent.gameObject.SetActive(false);
+    }
+
+    public void ClearScene()
+    {
+        cleaningEnd();
+        //TreesParent.gameObject.SetActive(false);
+        //FoodParent.gameObject.SetActive(false);
+        for (int i = 0; i < TreesParent.childCount; i++)
+        {
+            Destroy(TreesParent.GetChild(i).gameObject);
+        }
+        for (int i = 0; i < FoodParent.childCount; i++)
+        {
+            Destroy(FoodParent.GetChild(i).gameObject);
+        }
+    }
+
+    private IEnumerator playHeartEffect(float time)
+    {
+        GameObject effect = Instantiate(HeartsEffect, foodGeneratePosition.position, Quaternion.identity);
+        switch (usingPetIndex)
+        {
+            case (0):
+                effect.transform.position = LizadBubbles[0].transform.position;
+                break;
+            case (1):
+                effect.transform.position = CatBubbles[0].transform.position;
+                break;
+            case (2):
+                effect.transform.position = DogBubbles[0].transform.position;
+                break;
+        }
+        yield return new WaitForSeconds(time);
+        Destroy(effect);
     }
 }
