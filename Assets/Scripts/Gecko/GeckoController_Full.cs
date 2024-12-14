@@ -18,6 +18,14 @@ public class GeckoController_Full : MonoBehaviour
         StartCoroutine(LegUpdateCoroutine());
         TailInitialize();
         RootMotionInitialize();
+        this.gameObject.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        StartCoroutine(LegUpdateCoroutine());
+        TailInitialize();
+        RootMotionInitialize();
     }
 
     void Update()

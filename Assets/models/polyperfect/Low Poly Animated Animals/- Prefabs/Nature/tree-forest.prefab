@@ -122,3 +122,4 @@ MonoBehaviour:
   startScale: 0.1
   targetScale: 0.5
   duration: 0.5
+  growSound: {fileID: 8300000, guid: e8d91ce322ca98f468691f467e696d60, type: 3}

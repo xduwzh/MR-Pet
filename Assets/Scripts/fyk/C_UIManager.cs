@@ -95,12 +95,20 @@ public class C_UIManager : MonoBehaviour
 
     public Transform DebugPanel;
 
+    public AudioClip foodGenerate;
+    public AudioClip Change;
+    public AudioClip MoodIncrease;
+
+    [Header("PlayGame")]
+    public GameObject DogToy;
+    public GameObject CatToy;
+    public GameObject LizardToy;
+
     void Start()
     {
         Pets.Add(PetType.Lizard, new PetInfo("YellowLizard", 100.0f, 100.0f, 100.0f, LizardPrefab, LizardImage));
         Pets.Add(PetType.Cat, new PetInfo("BlackCat", 90.0f, 90.0f, 90.0f, CatPrefab, CatImage));
         Pets.Add(PetType.Dog, new PetInfo("GoldenRetriever", 80.0f, 80.0f, 80.0f, DogPrefab, DogImage));
- 
     }
 
     // Update is called once per frame
@@ -120,14 +128,28 @@ public class C_UIManager : MonoBehaviour
         {
             case (0):
                 tmp = Instantiate(LizardFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
+                LizardPrefab.GetComponent<GeckoController_Full>().target = tmp.transform;
                 break;
             case (1):
                 tmp = Instantiate(CatFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
+                Vector3 lookPositionCat = new Vector3(tmp.transform.position.x, CatPrefab.transform.position.y, tmp.transform.position.z);
+                CatPrefab.transform.LookAt(lookPositionCat);
+                if (CatPrefab.GetComponent<C_cat>().isSleeping)
+                {
+                    CatPrefab.GetComponent<C_cat>().showFood(tmp.transform.position);
+                }
                 break;
             case (2):
                 tmp = Instantiate(DogFoodPrefab, foodGeneratePosition.position, Quaternion.identity);
+                if (DogPrefab.GetComponent<C_cat>().currentState != DogPrefab.GetComponent<C_cat>().states[StateType.Sit])
+                {
+                    DogPrefab.GetComponent<C_cat>().TransitionState(StateType.Sit);
+                }
+                Vector3 lookPositionDog = new Vector3(tmp.transform.position.x, DogPrefab.transform.position.y, tmp.transform.position.z);
+                DogPrefab.transform.LookAt(lookPositionDog);
                 break;
         }
+        AudioSource.PlayClipAtPoint(foodGenerate, this.transform.position);
         tmp.transform.SetParent(FoodParent);
     }
     public void cleaning()
@@ -166,6 +188,7 @@ public class C_UIManager : MonoBehaviour
         }
         //curPet.Prefab.gameObject.SetActive(true);
         Pets[curPetType].Prefab.gameObject.SetActive(true);
+        AudioSource.PlayClipAtPoint(Change, this.transform.position);
     }
 
     public void ChangePet(PetType type)
@@ -196,6 +219,9 @@ public class C_UIManager : MonoBehaviour
                 {
                     Pets[curPetType].hunger += 20;
                 }
+                AudioSource.PlayClipAtPoint(C_AudioManager.instance.Eat, transform.position);
+                //C_AudioManager.instance.PlaySound(myAudioClip);
+                //C_AudioManager.instance.playSoundOnce("Eat");
                 break;
             case (1):
                 if (Pets[curPetType].hunger < 100 && Pets[curPetType].hunger >= 90)
@@ -206,6 +232,7 @@ public class C_UIManager : MonoBehaviour
                 {
                     Pets[curPetType].hunger += 10;
                 }
+                AudioSource.PlayClipAtPoint(C_AudioManager.instance.Eat, transform.position);
                 break;
             case (2):
                 if (Pets[curPetType].hunger < 100 && Pets[curPetType].hunger >= 70)
@@ -216,6 +243,7 @@ public class C_UIManager : MonoBehaviour
                 {
                     Pets[curPetType].hunger += 30;
                 }
+                AudioSource.PlayClipAtPoint(C_AudioManager.instance.DogEat, transform.position);
                 break;
         }
         if (Pets[curPetType].mood < 100 && Pets[curPetType].mood >= 95)
@@ -226,6 +254,7 @@ public class C_UIManager : MonoBehaviour
         {
             Pets[curPetType].mood += 5;
         }
+        
         StartCoroutine(playHeartEffect(2.0f));
         hungerBar.GetComponent<Scrollbar>().size = Pets[curPetType].hunger / 100.0f;
         moodBar.GetComponent<Scrollbar>().size = Pets[curPetType].mood / 100.0f;
@@ -288,6 +317,21 @@ public class C_UIManager : MonoBehaviour
         {
             Pets[curPetType].mood += 2;
         }
+        StartCoroutine(playHeartEffect(2.0f));
+        moodBar.GetComponent<Scrollbar>().size = Pets[curPetType].mood / 100.0f;
+    }
+
+    public void PetPlayed()
+    {
+        if (Pets[curPetType].mood < 100 && Pets[curPetType].mood >= 70)
+        {
+            Pets[curPetType].mood = 100;
+        }
+        else if (Pets[curPetType].mood < 70)
+        {
+            Pets[curPetType].mood += 30;
+        }
+        StartCoroutine(playHeartEffect(2.0f));
         moodBar.GetComponent<Scrollbar>().size = Pets[curPetType].mood / 100.0f;
     }
 
@@ -436,10 +480,14 @@ public class C_UIManager : MonoBehaviour
         {
             Destroy(FoodParent.GetChild(i).gameObject);
         }
+        DogToy.SetActive(false);
+        CatToy.SetActive(false);
+        LizardToy.SetActive(false);
     }
 
     private IEnumerator playHeartEffect(float time)
     {
+        AudioSource.PlayClipAtPoint(MoodIncrease, this.transform.position);
         GameObject effect = Instantiate(HeartsEffect, foodGeneratePosition.position, Quaternion.identity);
         switch (usingPetIndex)
         {
@@ -456,4 +504,37 @@ public class C_UIManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         Destroy(effect);
     }
+
+    public void DebugEvent()
+    {
+        C_AudioManager.instance.playSoundOnce("DogToy");
+    }
+
+    public void PlayGame()
+    {
+        CatToy.SetActive(false);
+        DogToy.SetActive(false);
+        switch (usingPetIndex)
+        {
+            case (0):
+                
+                break;
+            case (1):
+                if (CatToy.active == false)
+                {
+                    CatToy.SetActive(true);
+                }
+                Pets[curPetType].Prefab.GetComponent<C_cat>().StartPlayGame(CatToy);
+                break;
+            case (2):
+                if(DogToy.active == false)
+                {
+                    DogToy.SetActive(true);
+                }
+                Pets[curPetType].Prefab.GetComponent<C_Dog>().StartPlayGame(DogToy);
+            break;
+        }
+    }
+
+
 }

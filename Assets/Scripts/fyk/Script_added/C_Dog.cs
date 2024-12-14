@@ -1,91 +1,156 @@
+using Meta.XR.ImmersiveDebugger.UserInterface;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class C_Dog : C_pet
 {
-    public Transform bone;
-    public Transform romateBone;
+    public float stopDistance;
+    public float walkSpeed;
+    public float runSpeed;
+    public float startDistance;
+
+    public Transform DogToy;
+    public Transform MousePosition;
+    public GameObject UIManager;
+
     private float distance;
-    private float distace2;
-    private bool isGet = false;
-    private float timer = 1;
-    public Transform origalPosition;
+
+    private bool isGet = true;
+    private bool isStartGame = false;
+
+    private Vector3 startPosition;
+    private Vector3 targetPosition;
+
+
+    public Transform debugPanel;
+
+    public AudioClip DogBark;
     // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
         base.Start();
         states.Add(StateType.Sit, new SitState(this));
         states.Add(StateType.Run, new RunState(this));
         states.Add(StateType.Walk, new WalkState(this));
         states.Add(StateType.Bark, new BarkState(this));
+        states.Add(StateType.Idle, new IdleState(this));
 
-        TransitionState(StateType.Sit);
-        curMode = petMode.Idle;
+        TransitionState(StateType.Idle);
+
+        this.gameObject.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
+    {
+        TransitionState(StateType.Idle);
+    }
+
+    private void Update()
     {
         base.Update();
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            switch (animIndex)
-            {
-                case (1): TransitionState(StateType.Run); break;
-                case (2): TransitionState(StateType.Walk); break;
-                case (3): TransitionState(StateType.Bark); break;
-            }
-            animIndex++;
-        }
+        //debugPanel.GetComponent<TextMeshProUGUI>().text = "UpdateTest";
+        //string text = "isWalking: " + animator.GetBool("isWalking") + " " +
+        //    "isRunning: " + animator.GetBool("isRunning") + " " +
+        //    "isBarking: " + animator.GetBool("isBarking") + " " +
+        //    "isSitting: " + animator.GetBool("isSitting") + " " +
+        //    "isIdling: " + animator.GetBool("isIdling");
+        //debugPanel.GetComponent<TextMeshProUGUI>().text = text;
 
-        if (!isGet)
+        if (!isGet && isStartGame && currentState != states[StateType.Bark])
         {
-            distance = Vector3.Distance(transform.position, target.position);
+            targetPosition = new Vector3(DogToy.position.x, this.transform.position.y, DogToy.position.z);
+            distance = Vector3.Distance(transform.position, targetPosition);
             if (distance > stopDistance)
             {
-                transform.LookAt(target.position);
+                transform.LookAt(targetPosition);
                 if (currentState != states[StateType.Run])
                 {
                     TransitionState(StateType.Run);
                 }
-                transform.position = Vector3.MoveTowards(transform.position, target.position, runSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, runSpeed * Time.deltaTime);
             }
             else
             {
                 isGet = true;
-                bone.gameObject.SetActive(true);
-                romateBone.gameObject.SetActive(false);
+                //DogToy.position = MousePosition.position;
+                debugPanel.GetComponent<TextMeshProUGUI>().text = "SomethingWrong1";
+                DogToy.position = MousePosition.position;
+                DogToy.SetParent(MousePosition);
+                DogToy.GetComponent<Rigidbody>().useGravity = false;
+                //DogToy.position = new Vector3(0, 0, 0);
                 if (currentState != states[StateType.Bark])
                 {
+                    AudioSource.PlayClipAtPoint(DogBark, this.transform.position);
                     TransitionState(StateType.Bark);
                 }
+                debugPanel.GetComponent<TextMeshProUGUI>().text = "SomethingWrong2";
             }
         }
-        else if(timer <= 0)
+        else if (isGet && isStartGame && currentState != states[StateType.Bark])
         {
-            distance = Vector3.Distance(transform.position, origalPosition.position);
+            distance = Vector3.Distance(transform.position, startPosition);
             if (distance > stopDistance)
             {
-                transform.LookAt(origalPosition.position);
+                transform.LookAt(startPosition);
                 if (currentState != states[StateType.Walk])
                 {
                     TransitionState(StateType.Walk);
                 }
-                transform.position = Vector3.MoveTowards(transform.position, origalPosition.position, walkSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, startPosition, walkSpeed * Time.deltaTime);
             }
             else
             {
-                if (currentState != states[StateType.Sit])
+                DogToy.parent = null;
+                DogToy.GetComponent<Rigidbody>().useGravity = true;
+                if (currentState != states[StateType.Bark] && currentState != states[StateType.Idle])
+                {
+                    AudioSource.PlayClipAtPoint(DogBark, this.transform.position);
+                    TransitionState(StateType.Bark);
+                }else if(currentState == states[StateType.Idle])
                 {
                     TransitionState(StateType.Sit);
+                    isStartGame = false;
                 }
+                UIManager.GetComponent<C_UIManager>().PetPlayed();
             }
         }
-        else
+    }
+
+    public void AnimTestFunction()
+    {
+        debugPanel.GetComponent<TextMeshProUGUI>().text = "AnimTest";
+        switch (animIndex)
         {
-            timer -= Time.deltaTime;
+            case (1): TransitionState(StateType.Run); debugPanel.GetComponent<TextMeshProUGUI>().text = "run"; break;
+            case (2): TransitionState(StateType.Walk); debugPanel.GetComponent<TextMeshProUGUI>().text = "walk"; break;
+            case (3): TransitionState(StateType.Bark); debugPanel.GetComponent<TextMeshProUGUI>().text = "bark"; break;
+            case (4): TransitionState(StateType.Idle); debugPanel.GetComponent<TextMeshProUGUI>().text = "idle"; break;
+            case (5): TransitionState(StateType.Sit); debugPanel.GetComponent<TextMeshProUGUI>().text = "sit"; animIndex = 0; break;
         }
-        
+        animIndex++;
+    }
+
+    public void StartPlayGame(GameObject Toy)
+    {
+        TransitionState(StateType.Bark);
+        AudioSource.PlayClipAtPoint(DogBark, this.transform.position);
+        Vector3 lookTarget = new Vector3(Toy.transform.position.x, this.transform.position.y, Toy.transform.position.z);
+        transform.LookAt(lookTarget);
+    }
+    public void startGame()
+    {
+        targetPosition = new Vector3(DogToy.position.x, this.transform.position.y, DogToy.position.z);
+        distance = Vector3.Distance(transform.position, targetPosition);
+        if(distance > startDistance)
+        {
+            isGet = false;
+            isStartGame = true;
+            startPosition = transform.position;
+            TransitionState(StateType.Bark);
+            AudioSource.PlayClipAtPoint(DogBark, this.transform.position);
+        }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 public enum StateType
 {
-    Idle,Run,Walk,Attack,Dead,Sit,Sleep,Bark,Shake,Jump,LookingOut,JumpUp
+    Idle,Run,Walk,Attack,Dead,Sit,Sleep,Bark,Shake,Jump,LookingOut,JumpUp, StandUp
 }
 public enum petMode
 {
@@ -15,12 +15,13 @@ public enum petMode
 }
 public class C_pet : MonoBehaviour
 {
+    //public float walkSpeed = 5.0f;
+    //public float runSpeed = 10.0f;
+    //public float stopDistance = 3.0f;
+    //public Transform target;
+
+    [HideInInspector]
     public Animator animator;
-    public float walkSpeed = 5.0f;
-    public float runSpeed = 10.0f;
-    public float stopDistance = 3.0f;
-    
-    public Transform target;
     [HideInInspector]
     public int animIndex = 1;
     [HideInInspector]
@@ -46,7 +47,7 @@ public class C_pet : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
-        
+        currentState.OnUpdate();
     }
 
     void comeHere(Transform target)
@@ -212,10 +213,15 @@ public class BarkState : IState
     public void OnEnter()
     {
         pet.animator.SetBool("isBarking", true);
+        pet.animator.Play("Bark", 0, 0f);
     }
     public void OnUpdate()
     {
-
+        AnimatorStateInfo stateInfo = pet.animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.normalizedTime >= .95f)
+        {
+            pet.TransitionState(StateType.Idle);
+        }
     }
     public void OnExit()
     {
@@ -301,5 +307,31 @@ public class JumpUpState : IState
     public void OnExit()
     {
         pet.animator.SetBool("isJumping_Up", false);
+    }
+}
+
+public class StandUpState : IState
+{
+    private C_pet pet;
+    public StandUpState(C_pet animationController)
+    {
+        this.pet = animationController;
+    }
+    public void OnEnter()
+    {
+        pet.animator.SetBool("isStandUp", true);
+        pet.animator.Play("Cat_StandUp", 0, 0f);
+    }
+    public void OnUpdate()
+    {
+        AnimatorStateInfo stateInfo = pet.animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.normalizedTime >= .95f)
+        {
+            pet.TransitionState(StateType.Sit);
+        }
+    }
+    public void OnExit()
+    {
+        pet.animator.SetBool("isStandUp", false);
     }
 }

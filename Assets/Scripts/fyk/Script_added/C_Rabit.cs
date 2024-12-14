@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class C_Rabit : C_pet
 {
+
     // Start is called before the first frame update
     protected override void Start()
     {
